@@ -1,0 +1,15 @@
+{% extends 'categories.html' %}
+
+{% block content %}
+    <h1>{% block title %}{% endblock %}</h1>
+    <div style="width: 50%; margin: auto">
+        {% for dish in result %}
+        <div style="padding: 10px; background-color: #EEE; margin: 20px">
+            <a class="nav-link" href="{{ url_for('dish', cat_id=dish['Category'], dish_id=dish['ID']) }}">{{ dish['Dish_name'] }} review</a>
+            <p style="font-size: 22px">{{ dish['Dish_name'] }}</p>
+            <p style="font-size: 18px">$ {{ dish['Price'] }}</p>
+            <p style="font-size: 18px">{{ dish['Description'] }}</p>
+        </div>
+        {% endfor %}
+    </div>
+{% endblock %}

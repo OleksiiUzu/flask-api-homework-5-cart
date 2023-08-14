@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1>{% block title %} Edit dish {% endblock %}</h1>
+  <form method="POST" style="width: 50%; margin: auto">
+      {% for key, val in result.items() %}
+      {% if key != 'ID' %}
+      <br>
+      <input type="text" name="{{ key }}" value="{{ val }}">
+      <br>
+      {% endif %}
+      {% endfor %}
+      <input type="submit">
+  </form>
+  <br>
+{% endblock %}

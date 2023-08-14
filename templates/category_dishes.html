@@ -1,0 +1,21 @@
+{% extends 'categories.html' %}
+
+{% block content %}
+    <h1>{% block title %}{% endblock %}</h1>
+    <div style="width: 50%; margin: auto">
+        {% if session['Type'] == 'Admin' %}
+            <a class="nav-link" href="{{ url_for('admin_dish') }}" methods="POST">Add Dish</a>
+            <a class="nav-link" href="{{ url_for('admin_show_categories') }}">Categories</a>
+            <a class="nav-link" href="{{ url_for('search') }}">Search</a>
+        {% endif %}
+        {% for dish in result %}
+        <div style="padding: 10px; background-color: #EEE; margin: 20px">
+            <a class="nav-link" href="{{ url_for('dish', cat_id=dish['Category'], dish_id=dish['ID']) }}">{{ dish['Dish_name'] }} review</a>
+            <p style="font-size: 22px">{{ dish['Dish_name'] }}</p>
+            <p style="font-size: 18px">$ {{ dish['Price'] }}</p>
+            <p style="font-size: 18px">{{ dish['Description'] }}</p>
+            <img src="{{url_for('static', filename=dish['Photo'])}}" style="padding-left: 20px;" />
+        </div>
+        {% endfor %}
+    </div>
+{% endblock %}

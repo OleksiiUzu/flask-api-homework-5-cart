@@ -1,0 +1,21 @@
+{% extends 'menu.html' %}
+
+{% block content %}
+    <h1>{% block title %}Categories{% endblock %}</h1>
+    <div style="width: 50%; margin: auto">
+        {% if session['Type'] == 'Admin' %}
+            <a class="nav-link" href="{{ url_for('admin_category_edit') }}">Add Category</a>
+            {% for dict_item in result %}
+                <div style="padding: 10px; background-color: #EEE; margin: 20px">
+                    <a class="nav-link" href="{{ url_for('category_dishes', cat_id=dict_item['ID']) }}">{{ dict_item['Name'] }}</a>
+                </div>
+            {% endfor %}
+        {% else %}
+            {% for dict_item in result %}
+                <div style="padding: 10px; background-color: #EEE; margin: 20px">
+                    <a class="nav-link" href="{{ url_for('category_dishes', cat_id=dict_item['ID']) }}">{{ dict_item['Name'] }}</a>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+{% endblock %}

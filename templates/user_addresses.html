@@ -1,0 +1,21 @@
+{% extends 'user.html' %}
+
+{% block content %}
+    <h1>{% block title %}{% endblock %}</h1>
+    <div style="width: 50%; margin: auto">
+                        <a class="nav-link" href="{{ url_for('user_address_add') }}">Add</a>
+        {% for dish in result %}
+            {% for key, value in dish.items() %}
+                {% if key == 'ID' %}
+                        <a class="nav-link" href="{{ url_for('user_address', address_id=value) }}">Edit</a>
+                {% endif %}
+
+                {% if key != 'ID' %}
+                    <div style="padding: 10px; background-color: #EEE">
+                        <p style="font-size: 22px">{{ key }} : {{ value }}</p>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        {% endfor %}
+    </div>
+{% endblock %}

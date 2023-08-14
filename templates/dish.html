@@ -1,0 +1,22 @@
+{% extends 'category_dishes.html' %}
+
+{% block content %}
+    <h1>{% block title %}{% endblock %}</h1>
+    <div style="width: 50%; margin: auto">
+        {% for dish in result %}
+            {% if session['Type'] == 'Admin' %}
+                <a class="nav-link" href="{{ url_for('admin_dish_edit', dish_id=dish['ID']) }}">Edit Dish</a>
+            {% endif %}
+            {% for key, value in dish.items() %}
+                {% if key != 'ID' %}
+                    <div style="padding: 10px; background-color: #EEE">
+                        <p style="font-size: 22px">{{ key }} : {{ value }}</p>
+                        {% if key == 'Photo' %}
+                        <img src="{{url_for('static', filename=value)}}" style="padding-left: 20px;" />
+                        {% endif %}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        {% endfor %}
+    </div>
+{% endblock %}

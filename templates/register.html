@@ -1,0 +1,26 @@
+{% extends 'user.html' %}
+
+{% block content %}
+  <h1>{% block title %} Register {% endblock %}</h1>
+  <form method="POST" style="width: 50%; margin: auto">
+      <input type="text" name="Telephone" placeholder="Telephone">
+      <br>
+      <input type="text" name="Email" placeholder="Email">
+      <br>
+      <input type="text" name="Password" placeholder="Password">
+      <br>
+      <input type="text" name="Tg" placeholder="Tg">
+      <br>
+      <br>
+      <select id="Type">
+          <option value="0">Admin</option>
+          <option value="1">User</option>
+          <option value="2">Cashier</option>
+          <option value="3">Kitchen</option>
+      </select>
+      <br>
+      <br>
+      <input type="submit">
+  </form>
+  <br>
+{% endblock %}

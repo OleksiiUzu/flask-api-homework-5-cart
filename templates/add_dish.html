@@ -1,0 +1,34 @@
+{% extends 'user.html' %}
+
+{% block content %}
+  <h1>{% block title %} Add dish {% endblock %}</h1>
+  <form method="POST" style="width: 50%; margin: auto">
+      <input type="text" name="Dish_name" placeholder="Dish_name">
+      <br>
+      <input type="text" name="Price" placeholder="Price">
+      <br>
+      <input type="text" name="Description" placeholder="Description">
+      <br>
+      <input type="text" name="Available" placeholder="Available">
+      <br>
+      <p style="width: 50%; margin-top: 10px;">Category</p>
+      <select id="Category:" style="width: 29%; margin-bottom: 0px;">
+          {% for val in cat_data %}
+            <option value="{{ val['ID'] }}">{{ val['Name'] }}</option>
+          {% endfor %}
+      </select>
+      <br>
+      <input type="text" name="Photo" placeholder="Photo">
+      <br>
+      <input type="text" name="Ccal" placeholder="Ccal">
+      <br>
+      <input type="text" name="Protein" placeholder="Protein">
+      <br>
+      <input type="text" name="Fat" placeholder="Fat">
+      <br>
+      <input type="text" name="Carb" placeholder="Carb">
+      <br>
+      <input type="submit">
+  </form>
+  <br>
+{% endblock %}

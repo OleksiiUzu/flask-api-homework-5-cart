@@ -1,0 +1,29 @@
+{% extends 'user.html' %}
+
+{% block content %}
+  <h1>{% block title %} Edit {% endblock %}</h1>
+  <form method="POST" style="width: 50%; margin: auto">
+      <p>Telephone</p>
+      <input type="text" name="Telephone" value="{{ session['Telephone'] }}">
+      <br>
+      <br>
+      <p>Email</p>
+      <input type="text" name="Email" value="{{ session['Email'] }}">
+      <br>
+      <br>
+      <p>Tg</p>
+      <input type="text" name="Tg" value="{{ session['Tg'] }}">
+      <br>
+      <br>
+      <select id="Type">
+          <option value="0">Admin</option>
+          <option value="1">User</option>
+          <option value="2">Cashier</option>
+          <option value="3">Kitchen</option>
+      </select>
+      <br>
+      <br>
+      <input type="submit">
+  </form>
+  <br>
+{% endblock %}

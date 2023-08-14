@@ -1,0 +1,6 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>{% block title %} Main Page {% endblock %}</h1>
+    <img src="{{url_for('static', filename='main_page.png')}}" style="padding-left: 200px;" />
+{% endblock %}

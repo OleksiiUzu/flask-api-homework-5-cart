@@ -1,0 +1,21 @@
+{% extends 'user.html' %}
+
+{% block content %}
+    <h1>{% block title %}Edit{% endblock %}</h1>
+    <div style="width: 50%; margin: auto">
+        {% for dish in result %}
+            <div style="padding: 10px; background-color: #EEE; margin: 20px">
+                <form method="POST" style="width: 50%; margin: auto">
+                      {% for key, val in dish.items() %}
+                      {% if key != 'ID' %}
+                      <br>
+                      <input type="text" name="{{ key }}" value="{{ val }}">
+                      <br>
+                      {% endif %}
+                      {% endfor %}
+                      <input type="submit">
+                  </form>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

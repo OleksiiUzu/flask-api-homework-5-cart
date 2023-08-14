@@ -1,0 +1,23 @@
+{% extends 'user.html' %}
+
+{% block content %}
+  <h1>{% block title %} Login {% endblock %}</h1>
+<p>Test User Email: someDude@email.com</p>
+<p>Test User Password: VeryStrongPassword</p>
+<p>Test Admin Email: alemmmmx@gmail.com</p>
+<p>Test Admin Password: 222222</p>
+  <form method="POST" style="width: 50%; margin: auto">
+      <input type="text" name="Email" placeholder="Email">
+      <br>
+      <input type="text" name="Password" placeholder="Password">
+      <br>
+      <br>
+      <a class="nav-link" href="{{ url_for('user_restore') }}">Forgot password?</a>
+      <br>
+      <br>
+      <input type="submit">
+  </form>
+  <br>
+<p>If you don`t have an account click link down bellow</p>
+<a class="nav-link" href="{{ url_for('user_register') }}">Register</a>
+{% endblock %}

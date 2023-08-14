@@ -1,0 +1,18 @@
+{% extends 'user.html' %}
+
+{% block content %}
+    <h1>{% block title %}Order History{% endblock %}</h1>
+    <div style="width: 50%; margin: auto">
+        {% for item in result %}
+            <div style="padding: 10px; background-color: #EEE; margin: 20px">
+
+                {% for key, value in item.items() %}
+                {% if key == 'ID' %}
+                <a class="nav-link" href="{{ url_for('admin_order', order_id=value)  }}">Order Info</a>
+                <p style="font-size: 22px">ORDER ID : {{value}}</p>
+                {% endif %}
+                {% endfor %}
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

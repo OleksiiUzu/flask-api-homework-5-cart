@@ -1,0 +1,8 @@
+/admin/dishes [GET]					(Відображати перелік страв)
+/admin/dishes/<dish> [GET, PUT/POST, DELETE]		(Сторінка страви, Додати/Редагувати, Видалити)
+/admin/orders [GET]					(Всі замовлення)
+/admin/orders?status={new/in_progress} [GET]		(Нове замовлення/ Замовлення в роботі)
+/admin/orders/<id> [GET]				(Сторінка замовлення)
+/admin/orders/<id>/status [PUT/POST]			(Оновлення статусу замовлення)
+/admin/category [GET, PUT/POST, DELETE]			(Додати, Редагувати, Видалили категорію)
+/admin/search [GET/POST]				(Пошук за назвою)

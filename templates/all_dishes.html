@@ -1,0 +1,16 @@
+{% extends 'menu.html' %}
+
+{% block content %}
+    <h1>{% block title %}All Dishes{% endblock %}</h1>
+<p>ok</p>
+    <div style="width: 50%; margin: auto">
+        {% for dish in result %}
+            <div style="padding: 10px; background-color: #EEE; margin: 20px">
+                <a class="nav-link" href="{{ url_for('dish', cat_id=dish[5], dish_id=dish[0]) }}">{{ dish[1] }} Review</a>
+                <p style="font-size: 22px">{{ dish[1] }}</p>
+                <p style="font-size: 18px">$ {{ dish[2] }}</p>
+                <p style="font-size: 18px">{{ dish[3] }}</p>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}
