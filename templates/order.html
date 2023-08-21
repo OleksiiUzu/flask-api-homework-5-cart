@@ -6,9 +6,30 @@
         {% for item in result %}
             <div style="padding: 10px; background-color: #EEE; margin: 20px">
                 {% for key, value in item.items() %}
-                <p style="font-size: 22px">{{ key }} : {{value}}</p>
+                    {% if key != 'Status'%}
+                        <p style="font-size: 22px">{{ key }} : {{value}}</p>
+                    {% endif %}
+                    {% if key == 'Status' and value == 1 %}
+                        <p style="font-size: 22px">{{ key }} : In Progress</p>
+                    {% endif %}
+
+                    {% if key == 'Status' and value == 2 %}
+                        <p style="font-size: 22px">{{ key }} : Done</p>
+                    {% endif %}
+                {% endfor %}
+
+                {% for value in dish_data %}
+                <p style="font-size: 22px">{{value}}</p>
                 {% endfor %}
             </div>
         {% endfor %}
+
     </div>
+{% if session['Type']=='Admin' %}
+<form method="POST">
+    <button type="submit">
+        Done
+    </button>
+</form>
+{% endif %}
 {% endblock %}

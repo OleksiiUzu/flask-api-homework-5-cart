@@ -3,6 +3,7 @@
 {% block content %}
     <h1>{% block title %}{% endblock %}</h1>
     <div style="width: 50%; margin: auto">
+        {% if result %}
         {% for dish in result %}
             <div style="padding: 10px; background-color: #EEE; margin: 20px">
                 {% for name, val in dish.items() %}
@@ -11,6 +12,25 @@
                     {% endif %}
                 {% endfor %}
             </div>
+            <form method="post">
+                {% for name, val in dish.items() %}
+                    {% if name == 'ID' %}
+                        <input type="hidden" name="ID" value="{{ val }}">
+                        <button type="submit">Delete from cart</button>
+                    {% endif %}
+                {% endfor %}
+            </form>
         {% endfor %}
+        <form action="/cart/order">
+            <button type="submit">
+                Purchase
+                <a class="nav-link" href="{{ url_for('cart_order') }}"></a>
+            </button>
+        </form>
+        {% else %}
+        <h3>Cart is Empty</h3>
+        <a href="/menu">Go to dish menu</a>
+        {% endif %}
     </div>
+
 {% endblock %}

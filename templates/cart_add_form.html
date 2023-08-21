@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>{% block title %}{% endblock %}</h1>
+    <div style="width: 50%; margin: auto">
+        <form method="post">
+            <input name="count">
+            <input type="submit">
+        </form>
+    </div>
+{% endblock %}

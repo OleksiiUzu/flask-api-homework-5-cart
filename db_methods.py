@@ -30,8 +30,9 @@ class SQLiteDB:
             return answer.fetchone()
 
     def insert_into(self, table_name, params):
+        print('params: ', params)
         # у values перевіряється чи всі символи в значенні є числами, якщо ні то значення буде в лапках
-        values = ','.join([str(f"'{i}'") if not all(num.isdigit() for num in i) else str(i) for i in params.values()])
+        values = ','.join([str(f"'{i}'") if isinstance(i, str) and not all(num.isdigit() for num in i) else str(i) for i in params.values()])
         columns = ','.join([str(i) for i in params.keys()])
         print(values)
         print(columns)
@@ -51,12 +52,34 @@ class SQLiteDB:
     def update(self, table_name, columns: dict, param: dict):
         # знаю що DRY, потім щось придумаю))
         columns = ','.join([f"{key}='{value}'" for key, value in columns.items()])
-        param = ','.join([f"{key}='{value}'" for key, value in param.items()])
-        query = f"UPDATE {table_name} SET {columns} WHERE {param}"
-        return self.sql_query(query)
+        if len(param) > 1:
+            param = ' AND '.join([f"{key}='{value}'" for key, value in param.items()])
+            query = f"UPDATE {table_name} SET {columns} WHERE {param}"
+            return self.sql_query(query)
+        else:
+            param = ','.join([f"{key}='{value}'" for key, value in param.items()])
+            query = f"UPDATE {table_name} SET {columns} WHERE {param}"
+            return self.sql_query(query)
 
     def ordered_by(self, table_name, columns: list, param=None, asc_desc=None):
         columns = ','.join(columns)
         query = f"SELECT {columns} FROM {table_name} ORDER BY {param} {asc_desc}"
         return self.sql_query(query)
 
+    def delete_dish(self, table_name, columns: dict, param=False):
+
+        if param:
+            columns = ' AND '.join([f'{key}={value}' for key, value in columns.items()])
+            query = f"DELETE FROM {table_name} WHERE {columns}"
+            print(query)
+        else:
+            columns = ','.join([f'{key}={value}' for key, value in columns.items()])
+            query = f"DELETE FROM {table_name} WHERE {columns}"
+            print(query)
+        return self.sql_query(query)
+
+
+"""
+Додати join запит до класу
+SELECT * FROM Ordered_dishes join Dishes on Ordered_dishes.dish = Dishes.ID where Ordered_dishes.order_id = 123
+"""

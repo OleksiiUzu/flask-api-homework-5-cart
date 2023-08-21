@@ -1,20 +1,49 @@
 from flask import render_template, request, redirect, flash, session
 from db_methods import SQLiteDB
+import datetime
 
 
-# //////////////////////////////////////////////////////////////////////////////
+# /////////////////////////////DataBase Methods/////////////////////////////////////////////////
+
 #  З цим я потім придумаю як краще написати
-
 # get_all може бути True/False (fetchall() / fetchone()) , за замовчуванням повертає fetchall()
-def db_get_data(data_base, tables, *args, params=None, get_all=True):
+def db_get_data(data_base, table_name, *args, params=None, get_all=True):
+    """
+    :param data_base: name of database
+    :param table_name: name of table
+    :param args: columns {dict}
+    :param params: {dict} , adding WHERE to sql query
+    :param get_all: fetchall(True) or fetchone(False)
+    :return: dict
+    """
     with data_base as db:
-        result = db.select_from(tables, *args, param=params, all_data=get_all)
+        result = db.select_from(table_name, *args, param=params, all_data=get_all)
     return result
 
 
-def db_post_data(data_base, tables, params=None):
+def db_post_data(data_base, table_name, params=None):
+    """
+    :param data_base:  name of database
+    :param table_name: str
+    :param params: dict
+    :return:
+    """
     with data_base as db:
-        result = db.insert_into(tables, params)
+        result = db.insert_into(table_name, params)
+        print(result)
+    return result
+
+
+def db_del_data(data_base, table_name, columns, param=False):
+    """
+    :param columns: dict
+    :param data_base:  name of database
+    :param table_name: str
+    :param param: dict
+    :return:
+    """
+    with data_base as db:
+        result = db.delete_dish(table_name, columns, param=param)
     return result
 
 
@@ -24,12 +53,20 @@ def db_update_data(data_base, table_name, columns, params):
     return result
 
 
-def ordered(data_base, tables, params, asc_desc):
+def ordered(data_base, table_name, params, asc_desc):
     with data_base as db:
-        result = db.ordered_by(tables, ['*'], params, asc_desc=asc_desc)
+        result = db.ordered_by(table_name, ['*'], params, asc_desc=asc_desc)
     return result
 
-# //////////////////////////////////////////////////////////////////////////////
+
+def db_raw_query(data_base, query: str, get_all=True):
+    with data_base as db:
+        result = db.sql_query(query, all_data=get_all)
+    return result
+
+# ///////////////////////////////The END///////////////////////////////////////////////
+# /////////////////////////////////////////////////////////////////////////////////////
+# ///////////////////////////////Main Page, About Page Methods/////////////////////////
 
 
 def start_page():
@@ -37,7 +74,6 @@ def start_page():
     :return: Main Page.
     """
     if not session.get("Email") and not session.get("Password") and not session.get("ID"):
-        # if not there in the session then redirect to the login page
         return redirect("user/sign_in")
     return render_template('index.html')
 
@@ -49,15 +85,40 @@ def about():
     return render_template('about.html')
 
 
+# ///////////////////////////////The END///////////////////////////////////////////////
+# /////////////////////////////////////////////////////////////////////////////////////
+# ///////////////////////////////Cart Methods//////////////////////////////////////////
+def cart_add_order(post_data: dict, order_data: dict):
+    post_data['order_id'] = str(order_data['ID'])
+    db_post_data(SQLiteDB('Dishes.db'), 'Ordered_dishes', params=post_data)
+
+
 def cart():
     """
     Shows all dishes in cart.
     :return: data of all dishes in cart.
     """
-    if request.method == 'GET':
-        return render_template('cart.html',
-                               result=db_get_data(SQLiteDB('Dishes.db'), 'Orders', ['*'])
-                               )
+    user_id = session['ID']
+    order_status = 0
+    order = db_get_data(SQLiteDB('Dishes.db'), 'Orders', ["*"], params={'User': user_id, 'Status': order_status}, get_all=False)
+    ordered_dishes = False
+    try:
+        ordered_dishes = db_raw_query(SQLiteDB('Dishes.db'),
+                                      f'SELECT * FROM Ordered_dishes join Dishes on Ordered_dishes.dish = Dishes.ID where Ordered_dishes.order_id = {order["ID"]}')
+    except Exception as e:
+        print("Помилка:", e)
+    if request.method == 'POST':
+        del_order = request.form.to_dict()
+        if del_order:
+            try:
+                db_del_data(SQLiteDB('Dishes.db'), 'Ordered_dishes', columns={'order_id': order['ID'], 'dish': del_order['ID']}, param=True)
+            except Exception as e:
+                print("Помилка:", e)
+        return redirect('/cart')
+
+    return render_template('cart.html',
+                           result=ordered_dishes
+                           )
 
 
 def cart_order():
@@ -65,16 +126,97 @@ def cart_order():
     :return: order_data for paying.
     """
     if request.method == 'POST':
-        pass
+        try:
+            db_update_data(SQLiteDB('Dishes.db'), 'Orders', {'Status': 1}, params={'User': session['ID'], 'Status': 0})
+        except Exception as e:
+            print("Помилка:", e)
+        return redirect('/cart')
+    if request.method == 'GET':
+        try:
+            result = db_get_data(SQLiteDB('Dishes.db'), 'Orders', ['*'], params={'User': session['ID']})
+            result = result[0]
+            dish_data = db_raw_query(SQLiteDB('Dishes.db'),
+                                  f'SELECT * FROM Ordered_dishes join Dishes on Ordered_dishes.dish = Dishes.ID where Ordered_dishes.order_id = {result["ID"]}')
+            return render_template('cart_order.html', result=result, dish_data=dish_data)
+        except Exception as e:
+            print("Помилка:", e)
+        return render_template('cart_order.html')
 
 
 def cart_add():
     """
     Adding dish to cart.
-    POST / PUT methods
-    :return:  dish_data (I guess).
+    POST methods
+                                УВАГА !!!!!!
+            Ця функція в стадії розробки і не відповідає PEP8 !!!!
+        В коді можуть бути присутні заборонена магія, костилі, нецензурний код(код != PEP8)
+            Чутливим програмістам не рекомендується до ознайомлення!
+
+              Якщо ви, під час читання цього коду відчули:
+                Мігрень, запаморочення, нудоту, депрессію, сказ
+                То автор відповідальності за це НЕ несе!!!
+                Залиште перегляд і знайте що все працює (наче) )))
+                    Приємного перегляду!!!)))
     """
-    return
+    if session.get('ID') is None:
+        return redirect('/user/sign_in')
+    if request.method == 'POST':
+        data = request.form.to_dict()
+        res = db_get_data(SQLiteDB('Dishes.db'), 'Orders', ['*'], params={'User': session['ID'], 'Status': 0}, get_all=True)
+        current_datetime = datetime.datetime.now()
+        if res:
+            for i in res:
+                if i['User'] == session['ID'] and i['Status'] == 0:
+                    cart_add_order(data, i)
+                    return redirect('/menu')
+                elif i['User'] != session['ID']:
+                    data_result = db_get_data(SQLiteDB('Dishes.db'),
+                                              'Address',
+                                              ['ID'],
+                                              params={'User': session['ID']},
+                                              get_all=False)
+                    order_data = {'User': session['ID'],
+                                  'Address': data_result['ID'],
+                                  'price': '0',
+                                  'Ccal': '0',
+                                  'Fat': '0',
+                                  'Protein': '0',
+                                  'Carbon': '0',
+                                  'Order_date': current_datetime.strftime('%Y-%m-%d %H:%M:%S'),
+                                  'Status': '0'}
+                    try:
+                        db_post_data(SQLiteDB('Dishes.db'), 'Orders', params=order_data)
+                        result_order = db_get_data(SQLiteDB('Dishes.db'), 'Orders', ['*'], params={'User': session['ID']}, get_all=False)
+                        cart_add_order(data, result_order)
+                    except Exception as e:
+                        print("Помилка:", e)
+        else:
+            data_result = db_get_data(SQLiteDB('Dishes.db'), 'Address',
+                                                             ['ID'],
+                                                             params={'User': session['ID']},
+                                                             get_all=False)
+            order_data = {'User': session['ID'],
+                          'Address': data_result['ID'],
+                          'price': '0',
+                          'Ccal': '0',
+                          'Fat': '0',
+                          'Protein': '0',
+                          'Carbon': '0',
+                          'Order_date': current_datetime.strftime('%Y-%m-%d %H:%M:%S'),
+                          'Status': '0'}
+            try:
+                db_post_data(SQLiteDB('Dishes.db'), 'Orders', params=order_data)
+                res = db_get_data(SQLiteDB('Dishes.db'), 'Orders', ['*'], get_all=True)
+                for i in res:
+                    if i['User'] == session['ID'] and i['Status'] == 0:
+                        cart_add_order(data, i)
+            except Exception as e:
+                print("Помилка:", e)
+            return redirect('/')
+    return render_template('index.html')
+# ///////////////////////////////The END///////////////////////////////////////////////
+# /////////////////////////////////////////////////////////////////////////////////////
+# ///////////////////////////////User Methods//////////////////////////////////////////
 
 
 def user():
@@ -106,9 +248,12 @@ def user_update():
 def user_register():
     if request.method == 'POST':
         data = request.form.to_dict()
-        result = db_post_data(SQLiteDB('Dishes.db'), 'User', data)
-        if result:
-            return redirect('/user/sign_in')
+        try:
+            result = db_post_data(SQLiteDB('Dishes.db'), 'User', data)
+            if result:
+                return redirect('/user/sign_in')
+        except Exception as e:
+            print("Помилка:", e)
     return render_template('register.html')
 
 
@@ -169,7 +314,7 @@ def user_orders_history():
     if session.get('ID') is None:
         return redirect('/user/sign_in')
     if request.method == 'GET':
-        return render_template('user.html',
+        return render_template('orders.html',
                                result=db_get_data(SQLiteDB('Dishes.db'),
                                                   'Orders',
                                                   ['*'],
@@ -234,6 +379,9 @@ def user_address(address_id: int):
     return render_template('user_addresses.html')
 
 
+# ///////////////////////////////The END///////////////////////////////////////////////
+# /////////////////////////////////////////////////////////////////////////////////////
+# ///////////////////////////////Menu ,Category , Dish Methods/////////////////////////
 def menu():
     if request.method == 'GET':
         return render_template('menu.html',
@@ -268,10 +416,16 @@ def category_sort(cat_id, order_by, asc_desc_val):
     methods=['GET']
     :return:
     """
+    par = request.args
+    print(par)
     if request.method == "GET":
-        result = ordered(SQLiteDB('Dishes.db'), 'Dishes', params=order_by, asc_desc=asc_desc_val)
-        print(result)
-        return result
+        try:
+            result = ordered(SQLiteDB('Dishes.db'), 'Dishes', params=order_by, asc_desc=asc_desc_val)
+            print(result)
+            return result
+        except Exception as e:
+            print("Помилка:", e)
+
 
 
 def dishes():
@@ -279,8 +433,9 @@ def dishes():
     methods=['GET']
     :return:
     """
+    result = db_get_data(SQLiteDB('Dishes.db'), 'Dishes', ['*'])
     if request.method == 'GET':
-        return render_template('category_dishes.html', result=db_get_data(SQLiteDB('Dishes.db'), 'Dishes', ['*'])
+        return render_template('category_dishes.html', result=result
                                )
 
 
@@ -324,6 +479,9 @@ def dish_sort(order_by_var, asc_desc_val):
                                               asc_desc=asc_desc_val))
 
 
+# ///////////////////////////////The END///////////////////////////////////////////////
+# /////////////////////////////////////////////////////////////////////////////////////
+# ///////////////////////////////Admin Methods/////////////////////////////////////////
 def admin_dishes():
     """
     methods=['GET']
@@ -355,24 +513,35 @@ def admin_dish():
 
 
 def admin_dish_edit(dish_id):
-    """
-    methods=['GET', 'POST']
-    :return:
-    """
+    print(request.method)
     if session.get('ID') is None:
         return redirect('/user/sign_in')
     dish_data = db_get_data(SQLiteDB('Dishes.db'), 'Dishes', ['*'], params={'ID': dish_id})
     dish_data_dict = dish_data[0]
+    print(dish_data_dict)
     if request.method == 'POST':
         data = request.form.to_dict()
-        result = render_template('add_dish.html',
-                                 result=db_update_data(SQLiteDB('Dishes.db'),
-                                                       'Dishes',
-                                                       data,
-                                                       params={'ID': dish_data_dict['ID']}))
-        if result:
-            return redirect('/admin/dishes')
+        print('data: : ', data)
+        try:
+            result = render_template('add_dish.html',
+                                     result=db_update_data(SQLiteDB('Dishes.db'),
+                                                           'Dishes',
+                                                           data,
+                                                           params={'ID': dish_data_dict['ID']}))
+            if result:
+                return redirect('/admin/dishes')
+        except Exception as e:
+            print("Помилка:", e)
     return render_template('dish_edit.html', result=dish_data_dict)
+
+
+def delete_dish(dish_id):
+    if request.method == 'POST':
+        print('DELETE')
+        data = request.form.to_dict()
+        print('Delete method: ', data)
+        db_del_data(SQLiteDB('Dishes.db'), 'Dishes', data)
+    return redirect('/admin/dishes')
 
 
 def admin_orders():
@@ -383,22 +552,39 @@ def admin_orders():
     if session.get('ID') is None:
         return redirect('/user/sign_in')
     if request.method == 'GET':
+        in_progress_orders = db_get_data(SQLiteDB('Dishes.db'), 'Orders', ['*'], params={'Status': 1})
+        done_orders = db_get_data(SQLiteDB('Dishes.db'), 'Orders', ['*'], params={'Status': 2})
+        print(in_progress_orders)
+        print(done_orders)
         return render_template('orders.html',
-                               result=db_get_data(SQLiteDB('Dishes.db'), 'Orders', ['*'])
+                               progress=in_progress_orders,
+                               done=done_orders
                                )
 
 
 def admin_order(order_id: int):
     """
-    methods=['GET']
+    methods=['GET', 'POST']
     :return:
     """
+    print(request.method)
+    print(order_id)
     if session.get('ID') is None:
         return redirect('/user/sign_in')
-    if request.method == 'GET':
-        return render_template('order.html',
-                               result=db_get_data(SQLiteDB('Dishes.db'), 'Orders', ['*'], params={'id': order_id})
-                               )
+    ordered_dishes = db_raw_query(SQLiteDB('Dishes.db'),
+                                  f'SELECT * FROM Ordered_dishes join Dishes on Ordered_dishes.dish = Dishes.ID where Ordered_dishes.order_id = {order_id}')
+    print(ordered_dishes)
+    if request.method == "POST":
+        try:
+            db_update_data(SQLiteDB('Dishes.db'), 'Orders', {'Status': 2}, params={'ID': order_id})
+        except Exception as e:
+            print("Помилка:", e)
+        return redirect('/admin/orders')
+
+    return render_template('order.html',
+                           result=db_get_data(SQLiteDB('Dishes.db'), 'Orders', ['*'], params={'id': order_id}),
+                           dish_data=ordered_dishes
+                           )
 
 
 def admin_sort_order_status():
@@ -456,3 +642,5 @@ def admin_search():
     if session.get('ID') is None:
         return redirect('/user/sign_in')
 
+# ///////////////////////////////The END///////////////////////////////////////////////
+# /////////////////////////////////////////////////////////////////////////////////////

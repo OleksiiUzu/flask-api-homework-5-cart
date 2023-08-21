@@ -12,9 +12,9 @@
       <input type="text" name="Available" placeholder="Available">
       <br>
       <p style="width: 50%; margin-top: 10px;">Category</p>
-      <select id="Category:" style="width: 29%; margin-bottom: 0px;">
+      <select id="Category:" name="Category" style="width: 29%; margin-bottom: 0px;">
           {% for val in cat_data %}
-            <option value="{{ val['ID'] }}">{{ val['Name'] }}</option>
+            <option value="{{ val['ID'] }}" name="{{ val['Name'] }}">{{ val['Name'] }}</option>
           {% endfor %}
       </select>
       <br>

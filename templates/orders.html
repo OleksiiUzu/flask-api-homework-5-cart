@@ -3,9 +3,12 @@
 {% block content %}
     <h1>{% block title %}Order History{% endblock %}</h1>
     <div style="width: 50%; margin: auto">
-        {% for item in result %}
+        <h2>In Progress Orders: </h2>
+        {% if not progress %}
+        <p style="font-size: 22px">No Orders in progress</p>
+        {% else %}
+        {% for item in progress %}
             <div style="padding: 10px; background-color: #EEE; margin: 20px">
-
                 {% for key, value in item.items() %}
                 {% if key == 'ID' %}
                 <a class="nav-link" href="{{ url_for('admin_order', order_id=value)  }}">Order Info</a>
@@ -14,5 +17,23 @@
                 {% endfor %}
             </div>
         {% endfor %}
+        {% endif %}
+        <br>
+        <br>
+        <h2>Done Orders: </h2>
+        {% if not done %}
+        <p style="font-size: 22px">No Orders in Done</p>
+        {% else %}
+        {% for item in done %}
+            <div style="padding: 10px; background-color: #EEE; margin: 20px">
+                {% for key, value in item.items() %}
+                {% if key == 'ID' %}
+                <a class="nav-link" href="{{ url_for('admin_order', order_id=value)  }}">Order Info</a>
+                <p style="font-size: 22px">ORDER ID : {{value}}</p>
+                {% endif %}
+                {% endfor %}
+            </div>
+        {% endfor %}
+        {% endif %}
     </div>
 {% endblock %}
