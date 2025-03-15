@@ -77,9 +77,3 @@ class SQLiteDB:
             query = f"DELETE FROM {table_name} WHERE {columns}"
             print(query)
         return self.sql_query(query)
-
-
-"""
-Додати join запит до класу
-SELECT * FROM Ordered_dishes join Dishes on Ordered_dishes.dish = Dishes.ID where Ordered_dishes.order_id = 123
-"""
