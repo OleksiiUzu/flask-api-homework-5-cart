@@ -4,9 +4,6 @@ import datetime
 
 
 # /////////////////////////////DataBase Methods/////////////////////////////////////////////////
-
-#  З цим я потім придумаю як краще написати
-# get_all може бути True/False (fetchall() / fetchone()) , за замовчуванням повертає fetchall()
 def db_get_data(data_base, table_name, *args, params=None, get_all=True):
     """
     :param data_base: name of database
@@ -147,16 +144,27 @@ def cart_add():
     """
     Adding dish to cart.
     POST methods
-                                УВАГА !!!!!!
-            Ця функція в стадії розробки і не відповідає PEP8 !!!!
-        В коді можуть бути присутні заборонена магія, костилі, нецензурний код(код != PEP8)
-            Чутливим програмістам не рекомендується до ознайомлення!
-
-              Якщо ви, під час читання цього коду відчули:
-                Мігрень, запаморочення, нудоту, депрессію, сказ
-                То автор відповідальності за це НЕ несе!!!
-                Залиште перегляд і знайте що все працює (наче) )))
-                    Приємного перегляду!!!)))
+                                    WARNING!!!!!
+    This function is **under development** and **does NOT comply with PEP8**!!!  
+    
+    The code may contain:  
+    - Forbidden magic
+    - Dirty hacks
+    - Unholy, non-canonical code (code != PEP8)
+    
+    **Sensitive programmers are advised to look away!**  
+    
+    If while reading this code you experience:  
+    - Migraine
+    - Dizziness
+    - Nausea
+    - Depression
+    - Rage
+    
+    Then the author **takes NO responsibility for this!**  
+    Just close it and know that **it (kind of) works**.
+    
+    Enjoy the ride!
     """
     if session.get('ID') is None:
         return redirect('/user/sign_in')
